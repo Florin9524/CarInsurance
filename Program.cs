@@ -10,6 +10,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 });
 
 builder.Services.AddScoped<CarService>();
+builder.Services.AddHostedService<PolicyExpirationService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
