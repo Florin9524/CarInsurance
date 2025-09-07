@@ -45,4 +45,39 @@ public class CarService(AppDbContext db)
         await _db.SaveChangesAsync();
         return claim.Id;
     }
+
+    public async Task<CarHistoryResponse> GetCarHistoryAsync(long carId)
+    {
+        var car = await _db.Cars.FirstOrDefaultAsync(c => c.Id == carId);
+        if (car == null) throw new KeyNotFoundException($"Car {carId} not found");
+
+        // Add insurance policies
+        var policies = await _db.Policies
+            .Where(p => p.CarId == carId)
+            .OrderBy(p => p.StartDate)
+            .Select(p => new CarHistoryPolicyDto(
+                p.Provider ?? "Unknown Provider",
+                p.StartDate,
+                p.EndDate,
+                $"Insurance policy with {p.Provider ?? "Unknown Provider"} (valid until {p.EndDate})"
+            ))
+            .ToListAsync();
+
+        // Add claims
+        var claims = await _db.Claims
+            .Where(c => c.CarId == carId)
+            .OrderBy(c => c.ClaimDate)
+            .Select(c => new CarHistoryClaimDto(
+                c.ClaimDate,
+                $"Insurance claim: {c.Description} (Amount: {c.Amount:C})"
+            ))
+            .ToListAsync();
+
+        return new CarHistoryResponse(
+            car.Id,
+            car.Vin,
+            policies.OrderBy(p => p.start_date),
+            claims.OrderBy(c => c.claim_date)
+        );
+    }
 }
