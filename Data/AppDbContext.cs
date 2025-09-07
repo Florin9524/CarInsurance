@@ -15,11 +15,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(c => c.Vin)
             .IsUnique(false); // TODO: set true and handle conflicts
 
-        modelBuilder.Entity<InsurancePolicy>()
-            .Property(p => p.StartDate)
-            .IsRequired();
+        // modelBuilder.Entity<InsurancePolicy>()
+        //     .Property(p => p.StartDate)
+        //     .IsRequired();
 
-        // EndDate intentionally left nullable for a later task
+        modelBuilder.Entity<InsurancePolicy>(entity =>
+        {
+            entity.Property(p => p.StartDate).IsRequired();
+            entity.Property(p => p.EndDate).IsRequired();
+        });
     }
 }
 
@@ -40,9 +44,9 @@ public static class SeedData
         db.SaveChanges();
 
         db.Policies.AddRange(
-            new InsurancePolicy { CarId = car1.Id, Provider = "Allianz", StartDate = new DateOnly(2024,1,1), EndDate = new DateOnly(2024,12,31) },
-            new InsurancePolicy { CarId = car1.Id, Provider = "Groupama", StartDate = new DateOnly(2025,1,1), EndDate = null }, // open-ended on purpose
-            new InsurancePolicy { CarId = car2.Id, Provider = "Allianz", StartDate = new DateOnly(2025,3,1), EndDate = new DateOnly(2025,9,30) }
+            new InsurancePolicy { CarId = car1.Id, Provider = "Allianz", StartDate = new DateOnly(2024, 1, 1), EndDate = new DateOnly(2024, 12, 31) },
+            new InsurancePolicy { CarId = car1.Id, Provider = "Groupama", StartDate = new DateOnly(2025, 1, 1), EndDate = new DateOnly(2025, 1, 1) },
+            new InsurancePolicy { CarId = car2.Id, Provider = "Allianz", StartDate = new DateOnly(2025, 3, 1), EndDate = new DateOnly(2025, 9, 30) }
         );
         db.SaveChanges();
     }
